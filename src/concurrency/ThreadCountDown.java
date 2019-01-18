@@ -79,16 +79,27 @@ public class ThreadCountDown {
         @Override
         public void run() {
             Integer task;
-            while( (task = getTask()) != null ){
-                try{
-                    System.out.println(this.threadName+" is Working on Task: "+ task);
-                }catch (Exception ex){
-                    ex.printStackTrace();
-                }finally {
-                    threadsCountdown.countDown();
+            try{
+                //Check in the Task pool if anything pending to process
+                while( (task = getTask()) != null ){
+                    processTask(task);
                 }
+            }catch (Exception ex){
+                ex.printStackTrace();
+            }finally {
+                /*Reduce count when no more tasks to process. Eventually all
+                Threads will end-up here, reducing the count to 0, allowing
+                the flow to continue after threadsCountdown.await(); */
+                threadsCountdown.countDown();
             }
+        }
 
+        private void processTask(Integer task){
+            try{
+                System.out.println(this.threadName+" is Working on Task: "+ task);
+            }catch (Exception ex){
+                ex.printStackTrace();
+            }
         }
     }
 }
